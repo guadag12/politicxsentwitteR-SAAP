@@ -1,0 +1,268 @@
+---
+title: "politicxsentwitteR 🐦📦"
+author: 
+  - "Guada Gonzalez (guadagonz12@gmail.com)"
+output:
+  xaringan::moon_reader:
+    seal: false
+    css: "xaringan-themer.css"
+    nature:
+      navigation: 
+        scroll: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.width=9, fig.height=3.5, fig.retina=3,
+  out.width = "100%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  hiline = TRUE
+)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(xaringanExtra)
+style_duo_accent(
+  primary_color = "#266098",
+  secondary_color = "#c7c7c7",
+  inverse_header_color = "#001f3d",
+    header_font_google = google_font("Roboto"),
+  text_font_google   = google_font("Montserrat", "300", "300i"),
+  code_font_google   = google_font("Fira Mono"),
+  link_color = "#070a4a",  
+    link_decoration = "none"
+)
+```
+
+class: title-slide, center, middle, inverse
+
+background-image: url(https://github.com/Observatorio-de-Redes/politicosentwitter/raw/main/ShinyApp/www/img_net/Animation_fdt.gif)
+background-position: center
+background-size: 200px 200px
+# `r rmarkdown::metadata$title`
+### [`r fontawesome::fa("twitter")` @O_de_R](https://twitter.com/O_de_R)
+
+
+---
+class: middle, center
+
+## GICP OBSERVATORIO DE REDES [@O_de_R](www.twitter.com/O_de_R)
+</br>
+
+.center[<img src="https://github.com/guadag12/talk-cienciassoccomputacionales/raw/main/img/img-juani.png" width="15%"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="https://github.com/guadag12/talk-cienciassoccomputacionales/raw/main/img/img-guada.png" width="15%">]
+#### [@juanibelbis](www.twitter.com/juanibelbis) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       [@guadag12](www.twitter.com/guadag12) 
+.center[<img src="https://github.com/guadag12/talk-cienciassoccomputacionales/raw/main/img/img-agos.png" width="15%"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="https://github.com/guadag12/talk-cienciassoccomputacionales/raw/main/img/img-maca.png" width="15%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/guadag12/talk-cienciassoccomputacionales/raw/main/img/img-angie.png" width="15%">
+]
+#### [@AgosSanguinetti](https://twitter.com/AgosSanguinetti) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [@macarenazappe](https://twitter.com/macarenazappe) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [@angielafuente](https://twitter.com/angielafuente) 
+
+---
+
+class: middle, center
+
+
+<img src="https://github.com/Observatorio-de-Redes/politicosentwitter/raw/main/ShinyApp/www/img_polentwitter.png" width="90%" />
+
+
+##### [www.politicosentwitter.com](www.politicosentwitter.com)
+
+---
+class: middle, center
+
+<img src="https://github.com/guadag12/SAAP2021/raw/main/images/workflow.png" width="80%" />
+
+---
+class: middle, center
+
+## PoliticxsentwitteR 🐦📦
+### R package
+
+<img src="https://github.com/guadag12/politicxsentwitteR/raw/main/man/figures/logo.png" width="25%" />
+
+
+#### [Repositorio](https://github.com/guadag12/politicxsentwitteR)
+#### [Web Español](https://guadag12.github.io/politicxsentwitteR/index.html)
+
+---
+
+### Obtener data de tweets 🤳 👇
+
+```{r, echo = TRUE, include = FALSE}
+library(rmarkdown)
+library(devtools)
+library(politicxsentwitteR)
+```
+
+```{r, echo=TRUE, include=TRUE,warning = FALSE, message=FALSE,results = "hide"}
+library(politicxsentwitteR)
+af <- get_timeline_data(screen.name = "alferdez")
+```
+
+```{r, echo=FALSE, include=FALSE}
+af <- cbind(newColName = rownames(af), af)
+rownames(af) <- 1:nrow(af)
+af <- af[,-1]
+af
+```
+
+```{r, echo=TRUE, include=TRUE}
+paged_table(head(af,4))
+```
+
+
+---
+
+### Obtener data de cantidad de followers/friends 👥 
+
+```{r, echo=TRUE, include=TRUE, warning = FALSE, message=FALSE,results = "hide"}
+library(politicxsentwitteR)
+library(tidyverse)
+data_fr_fol <- get_friends_followers(screen.name = c("alferdez", "horaciorlarreta"))
+```
+
+
+```{r, echo=TRUE, include=TRUE}
+paged_table(head(data_fr_fol %>% arrange(desc(date)),6))
+```
+
+---
+
+class: middle, center
+
+## Evolución de followers de [@alferdez](https://twitter.com/alferdez) y [@horaciorlarreta](https://twitter.com/horaciorlarreta)
+
+```{r echo=FALSE, }
+library(ggpp)
+library(ggplot2)
+library(plotly)
+data_fr_fol %>% 
+  ggplot() + 
+  geom_line(aes(x=as.Date(date), y=as.numeric(followers_count), color=screen_name)) +
+  theme_bw() +
+  scale_color_manual(values = c("#00459e", "#ba9200")) +
+  labs( x = "Fecha", y = "Cantidad") +
+  facet_wrap(~screen_name, scale="free_y") +
+  geom_vline(xintercept = as.Date("2021-04-14"), color = "black") 
+#ggplotly(plot)
+
+```
+
+
+---
+
+class: middle, center
+
+```{r, echo=TRUE, include=FALSE, warning = FALSE, message=FALSE, eval=FALSE }
+library(politicxsentwitteR)
+network <- get_network_data("diputados")
+```
+
+
+<img src="https://github.com/guadag12/SAAP2021/raw/main/images/interior_pp.png" width="120%" />
+
+---
+
+class: middle, center
+
+## Visitas a la app!
+```{r, echo=FALSE, message=FALSE, results = 'hide' }
+library(readxl)
+library(tidyverse)
+library(plotly)
+url <- "https://github.com/guadag12/SAAP2021/blob/main/images/data_visitas.xlsx?raw=true"
+destfile <- "data_visitas.xlsx"
+curl::curl_download(url, destfile)
+data_visitas <- read_excel(destfile)
+p <- data_visitas %>%
+  ggplot( aes(x=timestamp2, y=visitas)) +
+    geom_area(fill="#34b4eb", alpha=0.5) +
+    geom_line(color="#34b4eb") +
+    ylab("visitas a la app") +
+  xlab("Fecha") +
+    theme_bw()
+```
+
+
+```{r, echo=FALSE }
+# Turn it interactive with ggplotly
+p <- ggplotly(p)
+p
+```
+
+
+---
+
+class: middle, center
+
+
+## 160 mil tweets recolectados! 🔓🗂
+
+### Expansión multinivel! 🌎🕸
+---
+
+class: middle, center
+
+
+## Exportación de la App! 🌎🚀
+
+## 160 mil tweets recolectados! 🔓🗂
+
+---
+
+
+class: middle, center
+
+.pull-left[
+<img src="https://github.com/guadag12/SAAP2021/raw/main/images/conducta-en-redes.png" width="100%" />
+
+### [conductaenredes.org](https://www.conductaenredes.com)
+
+
+]
+.pull-right[
+<img src="https://github.com/guadag12/SAAP2021/raw/main/images/me-representa.png" width="100%" />
+
+### [merepresenta.info](https://merepresenta.info)
+]
+
+
+---
+
+### Repositorio
+
+#### * Slides ([bit.ly/politicxsentwitter-saap](bit.ly/politicxsentwitter-saap))
+
+#### * Código ([link](https://github.com/guadag12/SAAP2021/))
+
+
+---
+
+class: inverse, middle, center
+
+# GRACIAS!🥰 
+</br>
+
+## PUEDEN ESCRIBIRNOS! 🙌 👇
+
+.pull-left[
+
+[`r fontawesome::fa("twitter")` @O_de_R](https://twitter.com/O_de_R)
+</br>
+[`r fontawesome::fa("github")` @Observatorio-de-Redes](http://github.com/Observatorio-de-Redes) 
+</br>
+
+
+]
+
+.pull-right[
+[`r fontawesome::fa("twitter")` @guadag12](https://twitter.com/guadag12)
+</br>
+[`r fontawesome::fa("github")` @guadag12](http://github.com/guadag12) 
+</br>
+[`r fontawesome::fa("paper-plane")` guadagonz12@gmail.com](guadagonz12@gmail.com)
+]
